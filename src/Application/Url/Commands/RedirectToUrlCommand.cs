@@ -1,6 +1,8 @@
-using FluentValidation;
+﻿using FluentValidation;
 using HashidsNet;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using UrlShortenerService.Application.Common.Exceptions;
 using UrlShortenerService.Application.Common.Interfaces;
 
 namespace UrlShortenerService.Application.Url.Commands;
@@ -33,7 +35,21 @@ public class RedirectToUrlCommandHandler : IRequestHandler<RedirectToUrlCommand,
 
     public async Task<string> Handle(RedirectToUrlCommand request, CancellationToken cancellationToken)
     {
-        await Task.CompletedTask;
-        throw new NotImplementedException();
+
+        var decode = _hashids.Decode(request.Id);
+        var idx = int.Parse(string.Concat(decode));
+
+        if (int.TryParse(string.Concat(decode), out int id))
+        {
+            var url = await _context.Urls.FirstOrDefaultAsync(u => u.Id == id);
+            if (url is null)
+                throw new NotFoundException($"The short url with Id ({request.Id}) was not found");
+
+            return url.OriginalUrl;
+        }
+        else
+        {
+            throw new ArgumentException($"The short url Id ({request.Id}) is invalid");
+        }
     }
 }

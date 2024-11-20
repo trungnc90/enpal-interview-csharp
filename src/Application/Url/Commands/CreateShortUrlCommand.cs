@@ -1,6 +1,7 @@
-using FluentValidation;
+﻿using FluentValidation;
 using HashidsNet;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using UrlShortenerService.Application.Common.Interfaces;
 
 namespace UrlShortenerService.Application.Url.Commands;
@@ -24,6 +25,8 @@ public class CreateShortUrlCommandHandler : IRequestHandler<CreateShortUrlComman
 {
     private readonly IApplicationDbContext _context;
     private readonly IHashids _hashids;
+    //private readonly string _shortHeader = "https://enpal.co/api/";
+    private readonly string _shortHeader = "https://localhost:7072/api/";
 
     public CreateShortUrlCommandHandler(IApplicationDbContext context, IHashids hashids)
     {
@@ -33,7 +36,27 @@ public class CreateShortUrlCommandHandler : IRequestHandler<CreateShortUrlComman
 
     public async Task<string> Handle(CreateShortUrlCommand request, CancellationToken cancellationToken)
     {
-        await Task.CompletedTask;
-        throw new NotImplementedException();
+        var url = await _context.Urls.FirstOrDefaultAsync(u => u.OriginalUrl.Equals(request.Url));
+        if (url is null)
+        {
+            try
+            {
+                var newUrl = new Domain.Entities.Url() { OriginalUrl = request.Url };
+
+                _ = _context.Urls.Add(newUrl);
+                _ = await _context.SaveChangesAsync(cancellationToken);
+
+                var code = _hashids.Encode((int)newUrl.Id);
+                return _shortHeader + code;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to add the url to the database", ex);
+            }
+        }
+        else
+        {
+            return _shortHeader + _hashids.Encode((int)url.Id);
+        }
     }
 }

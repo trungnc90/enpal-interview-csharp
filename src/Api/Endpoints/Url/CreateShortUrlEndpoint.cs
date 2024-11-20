@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using UrlShortenerService.Api.Endpoints.Url.Requests;
 using UrlShortenerService.Application.Url.Commands;
 using IMapper = AutoMapper.IMapper;
@@ -34,6 +34,12 @@ public class CreateShortUrlEndpoint : BaseEndpoint<CreateShortUrlRequest>
 
     public override async Task HandleAsync(CreateShortUrlRequest req, CancellationToken ct)
     {
+        // check URI
+        if (!Uri.TryCreate(req.Url, UriKind.Absolute, out _))
+        {
+            //await SendBadRequestAsync("The url is invalid");
+            //await SendAsync(400, cancellation: ct);
+        }
         var result = await Mediator.Send(
             new CreateShortUrlCommand
             {

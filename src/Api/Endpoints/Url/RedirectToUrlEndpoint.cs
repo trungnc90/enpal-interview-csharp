@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using UrlShortenerService.Api.Endpoints.Url.Requests;
 using UrlShortenerService.Application.Url.Commands;
 using IMapper = AutoMapper.IMapper;
@@ -42,6 +42,6 @@ public class RedirectToUrlEndpoint : BaseEndpoint<RedirectToUrlRequest>
             },
             ct
         );
-        await SendRedirectAsync(result);
+        await SendRedirectAsync("https://google.com");
     }
 }
