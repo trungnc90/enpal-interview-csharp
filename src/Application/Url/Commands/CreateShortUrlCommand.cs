@@ -25,8 +25,7 @@ public class CreateShortUrlCommandHandler : IRequestHandler<CreateShortUrlComman
 {
     private readonly IApplicationDbContext _context;
     private readonly IHashids _hashids;
-    //private readonly string _shortHeader = "https://enpal.co/api/";
-    private readonly string _shortHeader = "https://localhost:7072/api/";
+    private readonly string _shortHeader = "https://enpal.co/api/";
 
     public CreateShortUrlCommandHandler(IApplicationDbContext context, IHashids hashids)
     {
@@ -46,7 +45,7 @@ public class CreateShortUrlCommandHandler : IRequestHandler<CreateShortUrlComman
                 _ = _context.Urls.Add(newUrl);
                 _ = await _context.SaveChangesAsync(cancellationToken);
 
-                var code = _hashids.Encode((int)newUrl.Id);
+                var code = _hashids.EncodeLong(newUrl.Id);
                 return _shortHeader + code;
             }
             catch (Exception ex)
@@ -56,7 +55,7 @@ public class CreateShortUrlCommandHandler : IRequestHandler<CreateShortUrlComman
         }
         else
         {
-            return _shortHeader + _hashids.Encode((int)url.Id);
+            return _shortHeader + _hashids.EncodeLong(url.Id);
         }
     }
 }

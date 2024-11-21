@@ -35,11 +35,8 @@ public class RedirectToUrlCommandHandler : IRequestHandler<RedirectToUrlCommand,
 
     public async Task<string> Handle(RedirectToUrlCommand request, CancellationToken cancellationToken)
     {
-
-        var decode = _hashids.Decode(request.Id);
-        var idx = int.Parse(string.Concat(decode));
-
-        if (int.TryParse(string.Concat(decode), out int id))
+        var isSuccess = _hashids.TryDecodeSingleLong(request.Id, out long id);
+        if (isSuccess)
         {
             var url = await _context.Urls.FirstOrDefaultAsync(u => u.Id == id);
             if (url is null)

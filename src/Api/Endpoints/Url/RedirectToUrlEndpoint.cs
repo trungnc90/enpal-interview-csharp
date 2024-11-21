@@ -42,6 +42,6 @@ public class RedirectToUrlEndpoint : BaseEndpoint<RedirectToUrlRequest>
             },
             ct
         );
-        await SendRedirectAsync("https://google.com");
+        await SendRedirectAsync(result, false, true);
     }
 }
