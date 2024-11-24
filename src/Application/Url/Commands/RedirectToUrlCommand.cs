@@ -39,25 +39,20 @@ public class RedirectToUrlCommandHandler : IRequestHandler<RedirectToUrlCommand,
     public async Task<string> Handle(RedirectToUrlCommand request, CancellationToken cancellationToken)
     {
         var isSuccess = _hashids.TryDecodeSingleLong(request.Id, out long id);
-        if (isSuccess)
-        {
-
-            var cachedUrl = await _cache.GetStringAsync(id.ToString(), cancellationToken);
-            if (!string.IsNullOrEmpty(cachedUrl))
-            {
-                return cachedUrl;
-            }
-            var url = await _context.Urls.FirstOrDefaultAsync(u => u.Id == id);
-            if (url is null)
-                return string.Empty;
-
-            await _cache.SetStringAsync(id.ToString(), url.OriginalUrl, GetCacheOptions());
-            return url.OriginalUrl;
-        }
-        else
-        {
+        if (!isSuccess)
             throw new ArgumentException($"The short url Id ({request.Id}) is invalid");
+
+        var cachedUrl = await _cache.GetStringAsync(id.ToString(), cancellationToken);
+        if (!string.IsNullOrEmpty(cachedUrl))
+        {
+            return cachedUrl;
         }
+        var url = await _context.Urls.FirstOrDefaultAsync(u => u.Id == id);
+        if (url is null)
+            return string.Empty;
+
+        await _cache.SetStringAsync(id.ToString(), url.OriginalUrl, GetCacheOptions());
+        return url.OriginalUrl;
     }
 
     private DistributedCacheEntryOptions GetCacheOptions()

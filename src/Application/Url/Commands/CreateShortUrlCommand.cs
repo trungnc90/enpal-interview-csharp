@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using System.Data.Common;
+using FluentValidation;
 using HashidsNet;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +26,7 @@ public class CreateShortUrlCommandHandler : IRequestHandler<CreateShortUrlComman
 {
     private readonly IApplicationDbContext _context;
     private readonly IHashids _hashids;
-    private readonly string _shortHeader = "https://localhost:7072/u/";
+    //private readonly string _shortHeader = "https://localhost:7072/u/";
 
     public CreateShortUrlCommandHandler(IApplicationDbContext context, IHashids hashids)
     {
@@ -33,29 +34,35 @@ public class CreateShortUrlCommandHandler : IRequestHandler<CreateShortUrlComman
         _hashids = hashids;
     }
 
+
+    // Id as unique
+
     public async Task<string> Handle(CreateShortUrlCommand request, CancellationToken cancellationToken)
     {
-        var url = await _context.Urls.FirstOrDefaultAsync(u => u.OriginalUrl.Equals(request.Url));
-        if (url is null)
+        //try catch
+        // SingleOrDefault??
+
+
+        try
         {
-            try
-            {
-                var newUrl = new Domain.Entities.Url() { OriginalUrl = request.Url };
+            var url = await _context.Urls.FirstOrDefaultAsync(u => u.OriginalUrl.Equals(request.Url));
+            if (url is not null)
+                return _hashids.EncodeLong(url.Id);
 
-                _ = _context.Urls.Add(newUrl);
-                _ = await _context.SaveChangesAsync(cancellationToken);
+            var newUrl = new Domain.Entities.Url() { OriginalUrl = request.Url };
 
-                var code = _hashids.EncodeLong(newUrl.Id);
-                return _shortHeader + code;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Failed to add the url to the database", ex);
-            }
+            _ = _context.Urls.Add(newUrl);
+            _ = await _context.SaveChangesAsync(cancellationToken);
+
+            return _hashids.EncodeLong(newUrl.Id);
         }
-        else
+        catch (DbException)
         {
-            return _shortHeader + _hashids.EncodeLong(url.Id);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Failed to add the url to the database", ex);
         }
     }
 }
