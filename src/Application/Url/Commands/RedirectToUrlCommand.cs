@@ -40,7 +40,8 @@ public class RedirectToUrlCommandHandler : IRequestHandler<RedirectToUrlCommand,
         {
             var url = await _context.Urls.FirstOrDefaultAsync(u => u.Id == id);
             if (url is null)
-                throw new NotFoundException($"The short url with Id ({request.Id}) was not found");
+                //throw new NotFoundException($"The short url with Id ({request.Id}) was not found");
+                return string.Empty;
 
             return url.OriginalUrl;
         }

@@ -37,8 +37,8 @@ public class CreateShortUrlEndpoint : BaseEndpoint<CreateShortUrlRequest>
         // check URI
         if (!Uri.TryCreate(req.Url, UriKind.Absolute, out _))
         {
-            //await SendBadRequestAsync("The url is invalid");
-            //await SendAsync(400, cancellation: ct);
+            await SendErrorsAsync(cancellation: ct);
+            return;
         }
         var result = await Mediator.Send(
             new CreateShortUrlCommand

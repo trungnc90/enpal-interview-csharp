@@ -42,6 +42,11 @@ public class RedirectToUrlEndpoint : BaseEndpoint<RedirectToUrlRequest>
             },
             ct
         );
+        if (result == string.Empty)
+        {
+            await SendNotFoundAsync();
+            return;
+        }
         await SendRedirectAsync(result, false, true);
     }
 }

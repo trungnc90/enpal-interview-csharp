@@ -40,3 +40,5 @@ if (app.Environment.IsDevelopment())
 _ = app.UseHttpsRedirection();
 
 app.Run();
+
+public partial class Program { }
