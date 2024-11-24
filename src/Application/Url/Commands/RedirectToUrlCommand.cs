@@ -41,6 +41,7 @@ public class RedirectToUrlCommandHandler : IRequestHandler<RedirectToUrlCommand,
         var isSuccess = _hashids.TryDecodeSingleLong(request.Id, out long id);
         if (isSuccess)
         {
+
             var cachedUrl = await _cache.GetStringAsync(id.ToString(), cancellationToken);
             if (!string.IsNullOrEmpty(cachedUrl))
             {

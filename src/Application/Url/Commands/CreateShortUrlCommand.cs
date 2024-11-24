@@ -25,7 +25,7 @@ public class CreateShortUrlCommandHandler : IRequestHandler<CreateShortUrlComman
 {
     private readonly IApplicationDbContext _context;
     private readonly IHashids _hashids;
-    private readonly string _shortHeader = "https://enpal.co/api/";
+    private readonly string _shortHeader = "https://localhost:7072/u/";
 
     public CreateShortUrlCommandHandler(IApplicationDbContext context, IHashids hashids)
     {
