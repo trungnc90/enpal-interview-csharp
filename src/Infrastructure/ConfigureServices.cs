@@ -30,6 +30,7 @@ public static class ConfigureServices
         services.AddScoped<ApplicationDbContextInitialiser>();
 
         _ = services.AddTransient<IDateTime, DateTimeService>();
+        _ = services.AddDistributedMemoryCache();
 
         return services;
     }
