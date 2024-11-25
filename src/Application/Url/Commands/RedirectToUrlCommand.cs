@@ -1,9 +1,9 @@
-﻿using FluentValidation;
+﻿using System.Text;
+using FluentValidation;
 using HashidsNet;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
-using UrlShortenerService.Application.Common.Exceptions;
 using UrlShortenerService.Application.Common.Interfaces;
 
 namespace UrlShortenerService.Application.Url.Commands;
@@ -42,24 +42,24 @@ public class RedirectToUrlCommandHandler : IRequestHandler<RedirectToUrlCommand,
         if (!isSuccess)
             throw new ArgumentException($"The short url Id ({request.Id}) is invalid");
 
-        var cachedUrl = await _cache.GetStringAsync(id.ToString(), cancellationToken);
-        if (!string.IsNullOrEmpty(cachedUrl))
+        // mock: use GetAsync() instead of GetStringAsync
+        var cachedUrl = await _cache.GetAsync(id.ToString(), cancellationToken);
+        if (!(cachedUrl == null || cachedUrl.Length == 0))
         {
-            return cachedUrl;
+            return Encoding.UTF8.GetString(cachedUrl);
         }
+
         var url = await _context.Urls.FirstOrDefaultAsync(u => u.Id == id);
         if (url is null)
             return string.Empty;
 
-        await _cache.SetStringAsync(id.ToString(), url.OriginalUrl, GetCacheOptions());
+        await _cache.SetAsync(
+            id.ToString(),
+            Encoding.UTF8.GetBytes(url.OriginalUrl),
+            new DistributedCacheEntryOptions()
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(1)
+            });
         return url.OriginalUrl;
-    }
-
-    private DistributedCacheEntryOptions GetCacheOptions()
-    {
-        return new DistributedCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(1) // Cache entries expire in 1 day
-        };
     }
 }

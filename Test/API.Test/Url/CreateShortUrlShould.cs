@@ -36,7 +36,7 @@ public class CreateShortUrlShould(App TestApp) : TestBase<App>
         var code = hashIds.EncodeLong(originalUrl.Id);
 
         _ = rsp.StatusCode.Should().Be(HttpStatusCode.OK);
-        _ = res.Should().Be($"https://enpal.co/api/{code}");
+        _ = res.Should().Be(code);
     }
 
     [Fact]

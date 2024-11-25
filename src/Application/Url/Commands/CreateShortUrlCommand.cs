@@ -39,10 +39,6 @@ public class CreateShortUrlCommandHandler : IRequestHandler<CreateShortUrlComman
 
     public async Task<string> Handle(CreateShortUrlCommand request, CancellationToken cancellationToken)
     {
-        //try catch
-        // SingleOrDefault??
-
-
         try
         {
             var url = await _context.Urls.FirstOrDefaultAsync(u => u.OriginalUrl.Equals(request.Url));
